@@ -1,0 +1,13 @@
+{
+	"autodeskProduct":	"Fusion360",
+	"type":	"addin",
+	"id":	"6b509eec-34ca-4044-875d-cfb30563b658",
+	"author":	"",
+	"description":	{
+		"":	"Creates a spur gear component."
+	},
+	"version":	"",
+	"runOnStartup":	false,
+	"supportedOS":	"windows|mac",
+	"editEnabled":	true
+}
