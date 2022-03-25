@@ -1,4 +1,4 @@
-This is workaround solution to make 3Dconnexion SpaceMouse workable in Fusion 360 in Linux under WINE
+This is workaround solution to make 3Dconnexion SpaceMouse workable in Fusion 360 in Linux under WINE - [video](https://youtu.be/KpPamemM14c)
 #### how it work:
 solution consist from two part: 
 * spconvd - daemon that connect to [spacenavd](http://spacenav.sourceforge.net/) (open source linux driver for spacemouse), read mouse events and then send it to Fusion 360 via network through *localhost:11111*
