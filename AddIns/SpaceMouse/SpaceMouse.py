@@ -9,7 +9,6 @@ PORT = 11111
 
 app = None
 ui = None
-#adsk.core.UserInterface.cast(None)
 handlers = []
 stopFlag = None
 myCustomEvent = 'MyCustomEventId'
@@ -29,12 +28,6 @@ class ThreadEventHandler(adsk.core.CustomEventHandler):
     def notify(self, args):
         try:
             global app
-            global last_right
-            MOV_COEF = 0.001
-            ROT_COEF = 0.00015
-            #ROT_COEF = 0.000001
-            TILT_COEF= 0.00007
-            ZOOM_COEF = 0.005
 
             rotx_en = roty_en = rotz_en = movx_en = movy_en = movz_en = False
 
@@ -49,8 +42,10 @@ class ThreadEventHandler(adsk.core.CustomEventHandler):
 
             rx = eventArgs['rx']
             ry = eventArgs['ry']
-            #rx = 100 * sign(ry)
-            #ry = 100 * sign(eventArgs['ry'])
+            rz = eventArgs['rz']
+            x = eventArgs['x']
+            y = eventArgs['y']
+            z = eventArgs['z']
 
             # get state
             vi = app.activeViewport
@@ -59,69 +54,46 @@ class ThreadEventHandler(adsk.core.CustomEventHandler):
             tgt = camera.target
             up = camera.upVector
 
-            #av = adsk.core.Point2D.create(0, 0)
-            #bv = adsk.core.Point2D.create(vi.width, 0)
-            #aw = vi.viewToModelSpace(av)
-            #bw = vi.viewToModelSpace(bv)
+            # calc coef
+            coef = math.sqrt(camera.viewExtents)
 
-            #scale_coef = aw.distanceTo(bw) / vi.width
-            #zoom_coef = math.exp(tgt.distanceTo(eye)/100) + 1
-            scale_coef = 1
-            zoom_coef = 1
+            MOV_COEF = 0.0002 * coef
+            ROT_COEF = 0.00015
+            TILT_COEF = 0.00007
+            ZOOM_COEF = 0.0005 * coef
 
-
-            #ui.messageBox('aw: ' + str(aw.asArray()) + '\nbw: ' + str(bw.asArray()))
 
             # get matrix
             front = eye.vectorTo(tgt)
             right = front.crossProduct(up)
 
-            #ui.messageBox('last: ' + str(last_right.asArray()) + '\nnow: ' + str(front.asArray()) + '\nangle'+ str(front.angleTo(last_right)) + '\nright: ' + str(right.asArray()))
-            #ui.messageBox('right: ' + str(right.asArray()) + '\nup: ' + str(up.asArray()) + '\neye: ' + str(eye.asArray()) + '\ntgt: ' + str(tgt.asArray()))
-
-            check = True
+            matr = adsk.core.Matrix3D.create()
+            matr.setWithCoordinateSystem(eye, right, front, up)
 
             if rotx_en:
                 rotx = adsk.core.Matrix3D.create()
                 rotx.setToRotation(-rx * TILT_COEF, right, tgt)
-                eye.transformBy(rotx)
 
-                front_new = eye.vectorTo(tgt)
-                right_new = front_new.crossProduct(up)
-
-                #more than 180 rotation - need to change up vector direction
-                if ((not right.x) or (sign(right.x) != sign(right_new.x))):
-                    if ((not right.y) or (sign(right.y) != sign(right_new.y))):
-                        if ((not right.z) or (sign(right.z) != sign(right_new.z))):
-
-                            #new vectors
-                            up.setWithArray([-up.x, -up.y, -up.z])
-                            front.setWithArray([front_new.x, front_new.y, front_new.z])
-                            right = front.crossProduct(up)
-
-                            rotx.setToRotation(-rx * TILT_COEF, right, tgt)
-
-                            eye = camera.eye
-                            eye.transformBy(rotx)
+                matr.transformBy(rotx)
 
             if rotz_en:
-                eye_before = eye.copy()
                 rotz = adsk.core.Matrix3D.create()
                 rotz.setToRotation(-ry * ROT_COEF, up, tgt)
-                eye.transformBy(rotz)
 
-                front_new = eye.vectorTo(tgt)
-                right_new = front_new.crossProduct(up)
+                matr.transformBy(rotz)
 
             if roty_en:
                 roty = adsk.core.Matrix3D.create()
-                roty.setToRotation(-eventArgs['rz'] * TILT_COEF, front, tgt)
-                up.transformBy(roty)
+                roty.setToRotation(-rz * TILT_COEF, front, tgt)
+
+                matr.transformBy(roty)
+
+            (eye, right, front, up) = matr.getAsCoordinateSystem()
 
             if movx_en:
                 movx = right.copy()
                 movx.normalize()
-                movx.scaleBy(-eventArgs['x'] * MOV_COEF * scale_coef)
+                movx.scaleBy(-x * MOV_COEF)
 
                 eye.translateBy(movx)
                 tgt.translateBy(movx)
@@ -129,16 +101,17 @@ class ThreadEventHandler(adsk.core.CustomEventHandler):
             if movy_en:
                 movy = up.copy()
                 movy.normalize()
-                movy.scaleBy(-eventArgs['y'] * MOV_COEF * scale_coef)
+                movy.scaleBy(-y * MOV_COEF)
 
                 eye.translateBy(movy)
                 tgt.translateBy(movy)
 
             if movz_en:
                 ve = camera.viewExtents
-                ve += eventArgs['z'] * ZOOM_COEF * zoom_coef
+                ve += z * ZOOM_COEF
                 if ve > 0:
                     camera.viewExtents = ve
+
 
             # write back
             camera.isSmoothTransition = False

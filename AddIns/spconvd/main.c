@@ -23,7 +23,7 @@
 
 // decreasing events rate from spacemouse - this need for decrease rate of screen refresh in fusion360 - decrease cpu load
 #define SHAPE
-#define SHAPE_DELAY_MS 25
+#define SHAPE_DELAY_MS 30
 #define SHAPE_DELAY_US (SHAPE_DELAY_MS * 1000)
 
 #ifdef SHAPE
