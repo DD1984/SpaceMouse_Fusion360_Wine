@@ -5,8 +5,8 @@ New solution based on dll replacment and work together with open source linux dr
 
 #### instalation:
 * **spacenavd** must be installed first from you distributive repositories 
-* copy **siappdll.dll** to the folder of your program
-* setup *legacy* SpaceMouse driver in Fusion 360 *Preferences*
+* copy **siappdll.dll** to the folder of your program (folder where Fusion360.exe placed)
+* setup **_legacy_** SpaceMouse driver in Fusion 360 *Preferences*
 * **spnavcfg** could be installed - this is graphical util for fine tune space mouse parameters (this package do not exist in ubuntu repos, but you could download it from spacenavd website)
 
 #### TODO:
