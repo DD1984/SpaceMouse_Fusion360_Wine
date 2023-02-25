@@ -29,4 +29,4 @@ public:
 
 extern Logger logger;
 
-#define LOG(x) *(logger.log()) << #x << " "
+#define LOG(x) *(logger.log()) << "[*** SPMOUSE ***] " << #x << " "
