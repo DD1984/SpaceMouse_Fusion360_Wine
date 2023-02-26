@@ -8,7 +8,7 @@ int sock_connect(const char *sock_file)
 
 	int fd = l_socket(AF_UNIX, SOCK_STREAM, 0);
 	if (fd < 0) {
-		LOG(ERROR) << "Failed to create socket";
+		LOG(ERROR) << "Failed to create socket with err: " << fd;
 
 		return -1;
 	}
