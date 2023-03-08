@@ -4,11 +4,11 @@
 
 int sock_connect(const char *sock_file)
 {
-	LOG(TRACE) << "Creating socket";
+	LOG(INFO) << "Creating socket";
 
 	int fd = l_socket(AF_UNIX, SOCK_STREAM, 0);
 	if (fd < 0) {
-		LOG(ERROR) << "Failed to create socket with err: " << fd;
+		LOG(ERROR) << "Failed to create socket with err: 0x" << std::hex << fd;
 
 		return -1;
 	}
@@ -17,7 +17,7 @@ int sock_connect(const char *sock_file)
 	addr.sun_family = AF_UNIX;
 	snprintf(addr.sun_path, sizeof(addr.sun_path), sock_file);
 
-	LOG(TRACE) << "Attempting to connect to " << addr.sun_path;
+	LOG(INFO) << "Attempting to connect to " << addr.sun_path;
 
 	if (l_connect(fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
 		LOG(ERROR) << "Failed to connect";

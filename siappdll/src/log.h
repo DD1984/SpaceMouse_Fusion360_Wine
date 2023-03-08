@@ -6,7 +6,11 @@
 #include <iostream>
 #include <functional>
 
-//#define DEBUG
+enum class DbgType {
+    INFO_T = 0,
+    ERROR_T,
+    TRACE_T,
+};
 
 class Logger
 {
@@ -15,18 +19,20 @@ class Logger
 
 public:
     void log(const std::string& cmd) {
-#ifdef DEBUG
         std::cout << cmd << std::endl;
-#endif
     }
 
-    Buffer_p log() {
-        return Buffer_p(new Stream, [&](Stream* st) {
-            log(st->str());
+    Buffer_p log(DbgType l) {
+        return Buffer_p(new Stream, [&, this, l](Stream* st) {
+            if (l <= dbgLevel)
+                log(st->str());
             });
     }
+
+private:
+    DbgType dbgLevel = DbgType::ERROR_T;
 };
 
 extern Logger logger;
 
-#define LOG(x) *(logger.log()) << "[*** SPMOUSE ***] " << #x << " "
+#define LOG(x) *(logger.log(DbgType:: ## x ## _T)) << "[*** SPMOUSE ***] " << #x << " "
