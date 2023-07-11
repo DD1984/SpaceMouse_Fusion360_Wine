@@ -272,6 +272,9 @@ SPWbool SiIsInitialized()
 void SPWAPI SiTerminate(void)
 {
 	LOG(TRACE) << "Stub called: " << __FUNCTION__;
+
+	clear_context();
+
 	initialised = false;
 }
 
@@ -359,8 +362,6 @@ struct SiHdl* SPWAPI SiOpenPort(const char *pAppName, const SiDevPort *pPort, in
 enum SpwRetVal SPWAPI SiClose(struct SiHdl *si)
 {
 	LOG(TRACE) << "Stub called: " << __FUNCTION__;
-
-	clear_context();
 
 	delete si;
 	return SPW_NO_ERROR;
