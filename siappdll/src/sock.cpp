@@ -8,10 +8,19 @@ int sock_connect(const char *sock_file)
 
 	int fd = l_socket(AF_UNIX, SOCK_STREAM, 0);
 	if (fd < 0) {
-		LOG(ERROR) << "Failed to create socket with err: 0x" << std::hex << fd;
+		LOG(ERROR) << "l_socket() return err: 0x" << std::hex << fd;
 
-		return -1;
+		/* workaround because l_socket() sometime return strange 0xc0000002 value */
+		LOG(INFO) << "trying l_socket_int80h()";
+		fd = l_socket_int80h(AF_UNIX, SOCK_STREAM, 0);
+		if (fd < 0) {
+			LOG(ERROR) << "l_socket_int80h() return err: 0x" << std::hex << fd;
+			LOG(ERROR) << "Failed to create socket";
+			return -1;
+		}
 	}
+
+	LOG(INFO) << "fd: " << fd;
 
 	struct sockaddr_un addr;
 	addr.sun_family = AF_UNIX;

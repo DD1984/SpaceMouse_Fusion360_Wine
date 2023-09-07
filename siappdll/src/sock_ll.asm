@@ -4,6 +4,8 @@
 ALIGN 16
 
 ;RCX, b in RDX, c in R8
+; https://learn.microsoft.com/en-us/cpp/build/x64-software-conventions?view=msvc-170#x64-register-usage
+; https://syscall.sh/
 
 l_open PROC
 	sub		rsp, 28h		; shadow stack
@@ -84,6 +86,23 @@ l_socket PROC
 	add		rsp, 28h		; restoring shadow stack
 	ret
 l_socket ENDP
+
+l_socket_int80h PROC
+	sub		rsp, 28h		; shadow stack
+
+	push	rbx
+
+	mov		eax, 359
+	mov		ebx, ecx
+	mov		ecx, edx
+	mov		edx, r8d
+	int		80h
+
+	pop		rbx
+
+	add		rsp, 28h		; restoring shadow stack
+	ret
+l_socket_int80h ENDP
 
 l_connect PROC
 	sub		rsp, 28h		; shadow stack
