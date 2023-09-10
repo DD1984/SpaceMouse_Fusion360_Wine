@@ -49,6 +49,23 @@ l_read PROC
 	ret
 l_read ENDP
 
+l_read_int80h PROC
+	sub		rsp, 28h		; shadow stack
+
+	push	rbx
+
+	mov		rax, 3
+	mov		rbx, rcx
+	mov		rcx, rdx
+	mov		rdx, r8
+	int		80h
+
+	pop		rbx
+
+	add		rsp, 28h		; restoring shadow stack
+	ret
+l_read_int80h ENDP
+
 l_close PROC
 	sub		rsp, 28h		; shadow stack
 
@@ -65,6 +82,21 @@ l_close PROC
 	add		rsp, 28h		; restoring shadow stack
 	ret
 l_close ENDP
+
+l_close_int80h PROC
+	sub		rsp, 28h		; shadow stack
+
+	push	rbx
+
+	mov		rax, 6
+	mov		rbx, rcx
+	int		80h
+
+	pop		rbx
+
+	add		rsp, 28h		; restoring shadow stack
+	ret
+l_close_int80h ENDP
 
 l_socket PROC
 	sub		rsp, 28h		; shadow stack
@@ -124,5 +156,22 @@ l_connect PROC
 	add		rsp, 28h		; restoring shadow stack
 	ret
 l_connect ENDP
+
+l_connect_int80h PROC
+	sub		rsp, 28h		; shadow stack
+
+	push	rbx
+
+	mov		rax, 362
+	mov		rbx, rcx
+	mov		rcx, rdx
+	mov		rdx, r8
+	int		80h
+
+	pop		rbx
+
+	add		rsp, 28h		; restoring shadow stack
+	ret
+l_connect_int80h ENDP
 
 END
