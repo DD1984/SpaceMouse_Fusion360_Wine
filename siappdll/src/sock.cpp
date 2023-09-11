@@ -63,4 +63,6 @@ void sock_close(int fd)
 	int (*close_func)(int fd) = l_close;
 	if (int80h)
 		close_func = l_close_int80h;
+
+	close_func(fd);
 }
