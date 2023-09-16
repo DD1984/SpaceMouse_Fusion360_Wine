@@ -31,6 +31,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "MinHook.h"
 
+#define SHAPE
+#define SHAPE_DELAY_MS 30
+
 extern "C" {
 	typedef UINT(__stdcall* GETRAWINPUTDEVICEINFOW)(HANDLE, UINT, LPVOID, PUINT);
 
@@ -134,9 +137,29 @@ void clear_context(void)
 		CloseHandle(ghMutex);
 }
 
+void collectMotionEvent(motion_t m)
+{
+	WaitForSingleObject(ghMutex, INFINITE);
+
+	m_queue.push_back(m);
+
+	ReleaseMutex(ghMutex);
+
+	int ret = PostMessage(tgt_wndw, space_ware_message, SI_MOTION_EVENT, 1);
+	if (ret == 0)
+		std::cout << "error " << GetLastError() << "\n";
+	LOG(TRACE) << "message send";
+}
+
 DWORD WINAPI RcvThreadFunction(LPVOID lpParam)
 {
 	int fd = *(int *)lpParam;
+
+#ifdef SHAPE
+	ULONGLONG last = GetTickCount64();
+#endif
+	motion_t m;
+	memset(&m, 0, sizeof(motion_t));
 
 	while (1)
 	{
@@ -144,23 +167,33 @@ DWORD WINAPI RcvThreadFunction(LPVOID lpParam)
 		int ret = sock_read(fd, (char*)buf, sizeof(buf));
 		if (ret <= 0)
 			break;
-		
+
+#ifdef SHAPE
+		ULONGLONG now = GetTickCount64();
+
+		if ((now - last) > SHAPE_DELAY_MS) {
+			long sum = 0;
+			for (int i = 0; i < 6; i++)
+				sum |= m.data[i];
+			if (sum) {
+				collectMotionEvent(m);
+				memset(&m, 0, sizeof(motion_t));
+			}
+
+			last = now;
+		}
+#endif
+
 		if (buf[0] == 0)
 		{
-			WaitForSingleObject(ghMutex, INFINITE);
-
-			motion_t m;
 			for (int i = 0; i < 7; i++)
+#ifdef SHAPE
+				m.data[i] += buf[i + 1];
+#else
 				m.data[i] = buf[i + 1];
 
-			m_queue.push_back(m);
-
-			ReleaseMutex(ghMutex);
-
-			int ret = PostMessage(tgt_wndw, space_ware_message, SI_MOTION_EVENT, 1);
-			if (ret == 0)
-				std::cout << "error " << GetLastError() << "\n";
-			LOG(TRACE) << "message send";
+			collectMotionEvent(m);
+#endif
 		}
 
 #if 1
