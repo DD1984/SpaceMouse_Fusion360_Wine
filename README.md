@@ -1,3 +1,5 @@
+**pls, use development wine branch, in staging branch "ntdll-Syscall_Emulation" feature is enabled - and this feature prevent to use direct linux syscalls execution, whitch using by this dll to access to driver unix socket**  
+
 This is new solution to make 3Dconnexion SpaceMouse workable in Fusion 360 in Linux under WINE (other applications may work too)  
 New solution based on dll replacment and work together with open source linux driver for space mouse [spacenavd](http://spacenav.sourceforge.net/),  
 [old](https://github.com/DD1984/SpaceMouse_Fusion360_Wine/tree/master/AddIns) solution - based on AddIns
